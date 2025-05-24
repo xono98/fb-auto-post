@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import fs from 'fs';
+import path from 'path';
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 import { GoogleGenAI, Modality } from '@google/genai';
@@ -9,11 +10,51 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const FACEBOOK_PAGE_ID = process.env.FACEBOOK_PAGE_ID;
 const FACEBOOK_PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
 
-// Read prompts from prompts.txt
+// Read prompts from prompts.txt (only lines 1-30)
 function getRandomPrompt() {
-  const prompts = fs.readFileSync('prompts.txt', 'utf-8').split('\n').filter(Boolean);
-  const randomIndex = Math.floor(Math.random() * prompts.length);
-  return prompts[randomIndex];
+  try {
+    const promptsPath = path.join(process.cwd(), 'prompts.txt');
+    const prompts = fs.readFileSync(promptsPath, 'utf-8').split('\n').filter(Boolean);
+    // Only use first 30 lines
+    const validPrompts = prompts.slice(0, 30);
+
+    if (validPrompts.length === 0) {
+      throw new Error('No valid prompts found');
+    }
+
+    const randomIndex = Math.floor(Math.random() * validPrompts.length);
+    return validPrompts[randomIndex];
+  } catch (error) {
+    console.error('Error reading prompts.txt:', error.message);
+    // Fallback prompt
+    return 'Beautiful divine artwork with vibrant colors and spiritual energy';
+  }
+}
+
+// Read captions from caption.txt
+function getRandomCaption() {
+  try {
+    const captionPath = path.join(process.cwd(), 'caption.txt');
+    const fileContent = fs.readFileSync(captionPath, 'utf-8');
+
+    if (!fileContent || fileContent.length === 0) {
+      throw new Error('caption.txt is empty or could not be read');
+    }
+
+    // Split by === separator
+    const sections = fileContent.split('===').filter(section => section && section.trim().length > 10);
+
+    if (sections.length === 0) {
+      throw new Error('No valid captions found in caption.txt');
+    }
+
+    const randomIndex = Math.floor(Math.random() * sections.length);
+    return sections[randomIndex].trim();
+  } catch (error) {
+    console.error('Error reading caption.txt:', error.message);
+    // Fallback: return a simple caption
+    return 'Check out this amazing image! #art #creative #inspiration';
+  }
 }
 
 async function generateImage(prompt) {
@@ -61,13 +102,15 @@ async function postToFacebook(imageBuffer, caption) {
 async function main() {
   try {
     const prompt = getRandomPrompt();
+    const caption = getRandomCaption();
     console.log('Prompt:', prompt);
+    console.log('Caption:', caption);
 
     console.log('Generating image...');
     const imageBuffer = await generateImage(prompt);
 
     console.log('Posting to Facebook...');
-    await postToFacebook(imageBuffer, prompt);
+    await postToFacebook(imageBuffer, caption);
 
     console.log('Done!');
   } catch (error) {
