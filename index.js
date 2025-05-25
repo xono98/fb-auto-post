@@ -59,20 +59,15 @@ function getRandomCaption() {
 
 // Facebook optimal image formats
 const FACEBOOK_FORMATS = {
-  LANDSCAPE: {
-    ratio: '16:9',
-    description: 'Landscape (1200x675) - Best for feed posts',
-    prompt_suffix: 'High resolution 1200x675, aspect ratio 16:9, horizontal landscape orientation, professional quality, detailed artwork, sharp focus, vibrant colors, masterpiece quality, optimized for Facebook feed'
-  },
   SQUARE: {
     ratio: '1:1',
-    description: 'Square (1080x1080) - Best for Instagram-style posts',
-    prompt_suffix: 'High resolution 1080x1080, perfect square aspect ratio 1:1, professional quality, detailed artwork, sharp focus, vibrant colors, masterpiece quality, optimized for social media'
+    description: 'Square (1080x1080) - Perfect for Facebook feed',
+    prompt_suffix: 'High resolution 1080x1080, perfect square aspect ratio 1:1, professional quality, detailed artwork, sharp focus, vibrant colors, masterpiece quality, optimized for Facebook and social media'
   },
   PORTRAIT: {
     ratio: '4:5',
     description: 'Portrait (1080x1350) - Best for mobile viewing',
-    prompt_suffix: 'High resolution 1080x1350, aspect ratio 4:5, vertical portrait orientation, professional quality, detailed artwork, sharp focus, vibrant colors, masterpiece quality, mobile-optimized'
+    prompt_suffix: 'High resolution 1080x1350, aspect ratio 4:5, vertical portrait orientation, professional quality, detailed artwork, sharp focus, vibrant colors, masterpiece quality, mobile-optimized for Facebook'
   }
 };
 
