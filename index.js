@@ -57,12 +57,53 @@ function getRandomCaption() {
   }
 }
 
+// Facebook optimal image formats
+const FACEBOOK_FORMATS = {
+  LANDSCAPE: {
+    ratio: '16:9',
+    description: 'Landscape (1200x675) - Best for feed posts',
+    prompt_suffix: 'High resolution 1200x675, aspect ratio 16:9, horizontal landscape orientation, professional quality, detailed artwork, sharp focus, vibrant colors, masterpiece quality, optimized for Facebook feed'
+  },
+  SQUARE: {
+    ratio: '1:1',
+    description: 'Square (1080x1080) - Best for Instagram-style posts',
+    prompt_suffix: 'High resolution 1080x1080, perfect square aspect ratio 1:1, professional quality, detailed artwork, sharp focus, vibrant colors, masterpiece quality, optimized for social media'
+  },
+  PORTRAIT: {
+    ratio: '4:5',
+    description: 'Portrait (1080x1350) - Best for mobile viewing',
+    prompt_suffix: 'High resolution 1080x1350, aspect ratio 4:5, vertical portrait orientation, professional quality, detailed artwork, sharp focus, vibrant colors, masterpiece quality, mobile-optimized'
+  }
+};
+
+function getRandomFormat() {
+  const formats = Object.values(FACEBOOK_FORMATS);
+  const randomIndex = Math.floor(Math.random() * formats.length);
+  return formats[randomIndex];
+}
+
 async function generateImage(prompt) {
   const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
+  // Get random Facebook-optimized format
+  const format = getRandomFormat();
+  console.log(`Using format: ${format.description}`);
+
+  // Enhanced prompt with quality and ratio specifications
+  const enhancedPrompt = `${prompt}. ${format.prompt_suffix}. Ensure the composition fits perfectly within the specified aspect ratio without cropping important elements.`;
+
   const response = await ai.models.generateContent({
     model: 'gemini-2.0-flash-preview-image-generation',
-    contents: prompt,
-    config: { responseModalities: [Modality.TEXT, Modality.IMAGE] },
+    contents: enhancedPrompt,
+    config: {
+      responseModalities: [Modality.TEXT, Modality.IMAGE],
+      // Add generation config for better quality
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+      }
+    },
   });
 
   for (const part of response.candidates[0].content.parts) {
@@ -70,7 +111,7 @@ async function generateImage(prompt) {
       const imageData = part.inlineData.data;
       const buffer = Buffer.from(imageData, 'base64');
       fs.writeFileSync('generated_image.png', buffer);
-      console.log('Image saved as generated_image.png');
+      console.log(`High-resolution image saved as generated_image.png (${format.description})`);
       return buffer;
     }
   }
